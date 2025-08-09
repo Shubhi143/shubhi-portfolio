@@ -1,0 +1,38 @@
+name: Update portfolio data
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 1 * * *' # daily at 01:00 UTC (change in config.json if needed)
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps
+        run: |
+          npm init -y
+          npm i node-fetch@2
+
+      - name: Run fetch script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/fetch-data.js
+
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/data.json || true
+          git commit -m "chore: update portfolio data" || echo "no changes"
+          git push

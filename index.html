@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Shubhi Gupta — SDET</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+
+<body>
+    <main class="container">
+        <header class="hero">
+            <div class="left">
+                <div class="avatar"><img src="/profile.jpg" alt="Shubhi Gupta" /></div>
+                <h1 id="name">Loading...</h1>
+                <p id="role">Loading role...</p>
+                <div class="cta"><a id="resume" href="#" target="_blank">Download Resume</a></div>
+            </div>
+            <div class="right">
+                <h3>Contact</h3>
+                <p id="email">...</p>
+                <p><a id="linkedin" href="#" target="_blank">LinkedIn</a> • <a id="github" href="#" target="_blank">GitHub</a></p>
+            </div>
+        </header>
+
+        <section class="about">
+            <h2>About</h2>
+            <p id="about">Loading about...</p>
+        </section>
+
+        <section class="projects">
+            <h2>Projects</h2>
+            <div id="repos" class="grid"></div>
+        </section>
+
+        <footer>
+            <p>© <span id="year"></span> Shubhi Gupta — SDET @ Airtel Digital</p>
+        </footer>
+    </main>
+
+    <script>
+        async function loadData() {
+            try {
+                const cfg = await fetch('/config.json').then(r => r.json());
+                document.getElementById('name').textContent = cfg.name;
+                document.getElementById('role').textContent = cfg.role;
+                document.getElementById('email').innerHTML = `<a href=\"mailto:${cfg.email}\">${cfg.email}</a>`;
+                document.getElementById('linkedin').href = cfg.linkedin_url;
+                document.getElementById('github').href = `https://github.com/${cfg.github_username}`;
+                document.getElementById('resume').href = cfg.resume_url;
+                document.getElementById('year').textContent = new Date().getFullYear();
+
+                const data = await fetch('/data/data.json').then(r => r.json()).catch(() => null);
+                if (data && data.about) document.getElementById('about').textContent = data.about;
+                const reposDiv = document.getElementById('repos');
+                if (data && data.repos && data.repos.length) {
+                    reposDiv.innerHTML = data.repos.map(r => `<article class=\"card\"><h3><a href=\"${r.html_url}\" target=\"_blank\">${r.name}</a></h3><p>${r.description||''}</p><p class=\"meta\">${r.language||''}</p></article>`).join('');
+                } else {
+                    reposDiv.innerHTML = '<p>No repos found yet.</p>';
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        loadData();
+    </script>
+</body>
+
+</html>
